@@ -43,6 +43,35 @@ class API::V1::UsersController < ApplicationController
     end
   end
 
+  def update
+    @user = User.find(params[:id])
+    if @user
+      if @user.authenticate(user_params[:password])
+        if @user.update(user_params)
+          render json: {
+            status: :updated,
+            user: @user
+          }
+        else
+          render json: {
+            status: 500,
+            user: @user.errors.full_messages
+          }
+        end
+      else
+        render json: {
+          status: 500,
+          errors: ['Please provide your current password']
+        }
+      end
+    else
+      render json: {
+        status: 500,
+        errors: ['user not found']
+      }
+    end
+  end
+
   private
 
   def user_params
